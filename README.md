@@ -9,7 +9,7 @@ Here is how:
 
 2: paste this Cargo command:
 
-cargo build --target=riscv64gc-unknown-none-elf --release
+cargo build --target=riscv64gc-unknown-none-elf --release --no-default-features
 
 3: Check if it runs With QEMU or physical RISC-V board:
 

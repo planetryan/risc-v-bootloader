@@ -1,8 +1,6 @@
 #![no_std]
 #![no_main]
 
-use core::panic::PanicInfo;
-
 const MTIME: *const u64 = 0x0200_BFF8 as *const u64;
 const POWER_OFF: *mut u32 = 0x100000 as *mut u32;
 
@@ -25,6 +23,8 @@ pub extern "C" fn _start_rust() -> ! {
 }
 
 #[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
+fn panic(_info: &core::panic::PanicInfo) -> ! {
     loop {}
 }
+
+// BUILD USING 'cargo build --target=riscv64gc-unknown-none-elf --release --no-default-features'

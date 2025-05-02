@@ -2,27 +2,42 @@ ENTRY(_start)
 
 MEMORY
 {
-    TEXT (rx) : ORIGIN = 0x80000000, LENGTH = 16M
-    DATA (rw) : ORIGIN = 0x82000000, LENGTH = 64M
+    TEXT (rx)  : ORIGIN = 0x80000000, LENGTH = 16M
+    DATA (rw)  : ORIGIN = 0x81000000, LENGTH = 64M
 }
 
 SECTIONS
 {
-    . = 0x80000000;
+    /* Start of code section */
+    . = ORIGIN(TEXT);
 
-    .text : {
-        *(.text*)
+    .text : ALIGN(4)
+    {
+        KEEP(*(.init))
+        KEEP(*(.text.boot))
+        *(.text .text.*)
     } > TEXT
 
-    .data : {
-        *(.data*)
+    .rodata : ALIGN(4)
+    {
+        *(.rodata .rodata.*)
+    } > TEXT
+
+    .data : ALIGN(4)
+    {
+        *(.data .data.*)
     } > DATA
 
-    .bss : {
-        *(.bss*)
+    .bss : ALIGN(4)
+    {
+        __bss_start = .;
+        *(.bss .bss.*)
         *(COMMON)
+        __bss_end = .;
     } > DATA
 
+    /* End symbol for the linker */
     . = ALIGN(8);
     _end = .;
+    PROVIDE(end = .);
 }
