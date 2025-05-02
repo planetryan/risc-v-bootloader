@@ -6,7 +6,7 @@ use core::panic::PanicInfo;
 const MTIME: *const u64 = 0x0200_BFF8 as *const u64;
 const POWER_OFF: *mut u32 = 0x100000 as *mut u32;
 
-// Adjust based on QEMU's default timer frequency (usually 10_000_000 Hz)
+// based on QEMU's default timer frequency (usually 10 MHz)
 const TICKS_PER_SECOND: u64 = 10_000_000;
 const SECONDS_TO_WAIT: u64 = 5;
 

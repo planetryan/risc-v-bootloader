@@ -1,0 +1,16 @@
+TODO:
+
+> Create Bootloader
+
+> Write risc-v assembly to initialize the CPU and memory.
+
+> Assemble and link the bootloader code into an ELF file.
+
+> Test Bootloader with QEMU
+
+> Use QEMU to test if the bootloader correctly loads the Debian kernel.
+
+> Boot Debian in QEMU
+
+> Use the bootloader and Debian image to boot in QEMU.
+
