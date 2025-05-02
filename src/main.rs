@@ -27,4 +27,4 @@ fn panic(_info: &core::panic::PanicInfo) -> ! {
     loop {}
 }
 
-// BUILD USING 'cargo build --target=riscv64gc-unknown-none-elf --release --no-default-features'
+// BUILD USING "cargo build --target=riscv64gc-unknown-none-elf --release --no-default-features -v"
