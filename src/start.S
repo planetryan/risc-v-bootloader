@@ -3,11 +3,9 @@
     .section .text
 
 _start:
-
     la   sp, _stack_top
-
     jal  ra, _start_rust
-
+    
 hang:
     j hang
 
