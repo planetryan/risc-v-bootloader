@@ -27,3 +27,5 @@ pub extern "C" fn rust_main() -> ! {
     jump_to_kernel();
     loop {}
 }
+
+// BUILD USING "cargo build --target=riscv64gc-unknown-none-elf --release --no-default-features -v"
