@@ -1,15 +1,22 @@
-.global rust_main  # Make sure rust_main is visible to the linker
+.section .srodata
+.global __global_pointer$
+__global_pointer$:
+    .word 0
+
 .global _start
-.text
-.section .text
 
 _start:
-  la   sp, _stack_top
-  jal  ra, rust_main  # EXACT CASE MATCH HERE
+    la gp, __global_pointer$
+    la sp, stack_top
 
-hang:
-  j hang
+    call main  # Call main, not rust_start
 
-.bss
-_stack_top:
-  .skip 4096
+    # If main returns (it shouldn't), halt the system
+    halt:
+        j halt
+
+.section .bss
+.align 12
+stack_bottom:
+    .space 4096 * 4 # 16KB stack
+stack_top:

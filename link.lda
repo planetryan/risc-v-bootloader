@@ -1,48 +1,62 @@
+OUTPUT_ARCH( "riscv:rv64gc" )
 ENTRY(_start)
 
 MEMORY
 {
-    TEXT (rx)  : ORIGIN = 0x80000000, LENGTH = 16M
-    DATA (rw)  : ORIGIN = 0x81000000, LENGTH = 64M
+  ram (rwx) : ORIGIN = 0x80000000, LENGTH = 128M
 }
 
 SECTIONS
 {
-    /* Start of code section */
-    . = ORIGIN(TEXT);
+    . = 0x80000000;
 
-    .text : ALIGN(4)
-    {
-        KEEP(*(.init))
-        KEEP(*(.text.boot))
-        *(.text .text.*)
-    } > TEXT
+    .text : {
+        *(.text.entry); /* Keep this first */
+        *(.text*);
+    } > ram
 
-    .rodata : ALIGN(4)
-    {
-        *(.rodata .rodata.*)
-    } > TEXT
+    .rodata : {
+        *(.srodata*);
+        *(.rodata*);
+    } > ram
 
-    .data : ALIGN(4)
-    {
-        *(.data .data.*)
-    } > DATA
+    .data : {
+        *(.sdata*);
+        *(.data*);
+    } > ram
 
-    .bss : ALIGN(4)
-    {
+    .bss : {
         __bss_start = .;
-        *(.bss .bss.*)
-        *(COMMON)
+        *(.sbss*);
+        *(.bss*);
         __bss_end = .;
-    } > DATA
+    } > ram
 
-    /* Reserve space for the stack at the top of the DATA region */
-    . = ORIGIN(DATA) + LENGTH(DATA);
-    _stack_top = .;
-    PROVIDE(_stack_top = _stack_top);
+    /DISCARD/ : {
+        *(.comment);
+        *(.note*);
+        *(.eh_frame*);
+    }
 
-    /* End symbol for the linker */
-    . = ALIGN(8);
-    _end = .;
-    PROVIDE(end = .);
+    . = ALIGN(4096); /* align to page size */
+
+    /* Stabs debugging sections.  */
+    .stab 0 : { *(.stab) }
+    .stabstr 0 : { *(.stabstr) }
+    .stab.excl 0 : { *(.stab.excl) }
+    .stab.exclstr 0 : { *(.stab.exclstr) }
+    .stab.index 0 : { *(.stab.index) }
+    .stab.indexstr 0 : { *(.stab.indexstr) }
+
+    /* DWARF debugging sections.
+       See the section "Linking with DWARF" in the GNU ld documentation.  */
+    .debug_aranges 0 : { *(.debug_aranges) }
+    .debug_pubnames 0 : { *(.debug_pubnames) }
+    .debug_info 0 : { *(.debug_info .gnu.linkonce.wi.*) }
+    .debug_abbrev 0 : { *(.debug_abbrev) }
+    .debug_line 0 : { *(.debug_line .gnu.linkonce.wl.*) }
+    .debug_frame 0 : { *(.debug_frame) }
+    .debug_str 0 : { *(.debug_str) }
+    .debug_loc 0 : { *(.debug_loc) }
+    .debug_ranges 0 : { *(.debug_ranges) }
 }

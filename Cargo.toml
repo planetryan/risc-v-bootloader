@@ -3,6 +3,8 @@ name = "bootloader"
 version = "0.1.0"
 edition = "2021"
 
-[lib]
-crate-type = ["staticlib"]
-path = "src/boot_entry.rs" # Specify the path to the library source file
+[dependencies]
+volatile = "0.2.7"
+
+[profile.release]
+# panic = "abort"  Removed panic setting
