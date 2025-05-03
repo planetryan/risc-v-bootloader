@@ -1,6 +1,7 @@
 CROSS = riscv64-unknown-elf-
 
-OBJS = start.o $(BUILD_DIR)/bootloader.o boot.o
+OBJS = start.o # Removed entry.o
+
 TARGET = bootloader.elf
 BIN = bootloader.bin
 
@@ -12,43 +13,49 @@ BUILD_DIR = target/riscv64gc-unknown-none-elf/release
 
 QEMU_FLAGS = -machine virt -nographic -bios none -display sdl
 
+# Main target to build the bootloader ELF
 all: $(BUILD_DIR)/$(TARGET)
 
-%.o: %.S
+# Assembly files
+start.o: start.S
 	$(CROSS)as $(ASFLAGS) -o $@ $<
 
-$(BUILD_DIR)/bootloader.o: src/main.rs
+# Build the Rust static library
+$(BUILD_DIR)/libbootloader.a: src/lib.rs
 	cargo clean
 	cargo build --target=riscv64gc-unknown-none-elf --release --no-default-features -v
-	# Check if the cargo build command was successful
+	# Check if cargo build was successful
 	if [ $$? -eq 0 ]; then \
 		echo "Cargo build successful"; \
 	else \
 		echo "Error: Cargo build failed"; \
 		exit 1; \
 	fi
-	ls -l $(BUILD_DIR)/deps/
-	# The object file should be named after the package
-	cp $(BUILD_DIR)/deps/bootloader-c0ef28f19971401b $(BUILD_DIR)/bootloader.o
 
-boot.o: boot.S
-	$(CROSS)as $(ASFLAGS) -o $@ $<
-
-$(BUILD_DIR)/$(TARGET): $(OBJS)
+# Link all the object files and the Rust static library into the bootloader ELF
+$(BUILD_DIR)/$(TARGET): $(OBJS) $(BUILD_DIR)/libbootloader.a
 	@mkdir -p $(BUILD_DIR)
-	$(CROSS)ld $(LDFLAGS) -o $@ $(OBJS)
+	$(CROSS)ld $(LDFLAGS) -o $@ $(OBJS) $(BUILD_DIR)/libbootloader.a
 
+# Convert the ELF file to a binary
 bin: $(BUILD_DIR)/$(TARGET)
 	$(CROSS)objcopy -O binary $< $(BIN)
 
+# Run QEMU with the ELF file
 run: all
 	qemu-system-riscv64 $(QEMU_FLAGS) -kernel $(BUILD_DIR)/$(TARGET)
 
 run-bios: bin
 	qemu-system-riscv64 $(QEMU_FLAGS) -bios $(BIN)
 
+start.o: start.S
+	$(CROSS)as $(ASFLAGS) -o $@ $<
+	echo "start.o created in $(shell pwd)"
+
 clean:
 	rm -f *.o *.bin
 	rm -f $(BUILD_DIR)/$(TARGET)
-	rm -f $(BUILD_DIR)/bootloader.o
 	rm -rf $(BUILD_DIR)/deps/
+	rm -f $(BUILD_DIR)/libbootloader.a
+
+	

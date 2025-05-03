@@ -1,5 +1,5 @@
-#![no_std] 
-#![no_main] 
+#![no_std]
+#![no_main]
 
 use core::panic::PanicInfo;
 
@@ -8,19 +8,20 @@ fn panic(_info: &PanicInfo) -> ! {
     loop {}
 }
 
-fn memory_setup() {}
+fn memory_setup() {
+    // You can initialize memory, map regions, etc.
+}
 
 fn jump_to_kernel() {
-    let kernel_entry_point: usize = 0x80000000; 
+    let kernel_entry_point: usize = 0x80000000;
     unsafe {
-        let entry_point = kernel_entry_point as *const ();
-        let kernel_fn: fn() = core::mem::transmute(entry_point);
+        let kernel_fn: fn() = core::mem::transmute(kernel_entry_point as *const ());
         kernel_fn();
     }
 }
 
-#[no_mangle] 
-pub extern "C" fn _start() -> ! {
+#[no_mangle]
+pub extern "C" fn rust_start() -> ! {
     memory_setup();
     jump_to_kernel();
     loop {}

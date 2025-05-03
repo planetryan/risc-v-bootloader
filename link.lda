@@ -1,0 +1,48 @@
+ENTRY(_start)
+
+MEMORY
+{
+    TEXT (rx)  : ORIGIN = 0x80000000, LENGTH = 16M
+    DATA (rw)  : ORIGIN = 0x81000000, LENGTH = 64M
+}
+
+SECTIONS
+{
+    /* Start of code section */
+    . = ORIGIN(TEXT);
+
+    .text : ALIGN(4)
+    {
+        KEEP(*(.init))
+        KEEP(*(.text.boot))
+        *(.text .text.*)
+    } > TEXT
+
+    .rodata : ALIGN(4)
+    {
+        *(.rodata .rodata.*)
+    } > TEXT
+
+    .data : ALIGN(4)
+    {
+        *(.data .data.*)
+    } > DATA
+
+    .bss : ALIGN(4)
+    {
+        __bss_start = .;
+        *(.bss .bss.*)
+        *(COMMON)
+        __bss_end = .;
+    } > DATA
+
+    /* Reserve space for the stack at the top of the DATA region */
+    . = ORIGIN(DATA) + LENGTH(DATA);
+    _stack_top = .;
+    PROVIDE(_stack_top = _stack_top);
+
+    /* End symbol for the linker */
+    . = ALIGN(8);
+    _end = .;
+    PROVIDE(end = .);
+}

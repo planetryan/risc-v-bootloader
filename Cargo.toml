@@ -3,13 +3,6 @@ name = "bootloader"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
-# Ensure all dependencies here are compatible with `#![no_std]`
-
-[build-dependencies]
-
-[profile.release]
-panic = "abort"
-
-[profile.dev]
-panic = "abort"
+[lib]
+crate-type = ["staticlib"]
+path = "src/boot_entry.rs" # Specify the path to the library source file

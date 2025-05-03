@@ -1,30 +1,29 @@
 #![no_std]
 #![no_main]
 
-const MTIME: *const u64 = 0x0200_BFF8 as *const u64;
-const POWER_OFF: *mut u32 = 0x100000 as *mut u32;
-
-// based on QEMU's default timer frequency (usually 10 MHz)
-const TICKS_PER_SECOND: u64 = 10_000_000;
-const SECONDS_TO_WAIT: u64 = 5;
-
-#[no_mangle]
-pub extern "C" fn _start_rust() -> ! {
-    let start = unsafe { core::ptr::read_volatile(MTIME) };
-    let end = start + SECONDS_TO_WAIT * TICKS_PER_SECOND;
-
-    while unsafe { core::ptr::read_volatile(MTIME) } < end {}
-
-    unsafe {
-        core::ptr::write_volatile(POWER_OFF, 0x5555);
-    }
-
-    loop {}
-}
+use core::panic::PanicInfo;
 
 #[panic_handler]
-fn panic(_info: &core::panic::PanicInfo) -> ! {
+fn panic(_info: &PanicInfo) -> ! {
     loop {}
 }
 
-// BUILD USING 'cargo build --target=riscv64gc-unknown-none-elf --release --no-default-features'
+fn memory_setup() {
+    // Initialize memory (MMU setup, etc. if needed)
+}
+
+fn jump_to_kernel() {
+    let kernel_entry_point: usize = 0x80000000;
+    unsafe {
+        let entry_point = kernel_entry_point as *const ();
+        let kernel_fn: fn() = core::mem::transmute(entry_point);
+        kernel_fn();
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn rust_main() -> ! {
+    memory_setup();
+    jump_to_kernel();
+    loop {}
+}
